@@ -18,26 +18,6 @@ Want to synth consonants like 'l','r','n' better.
 
 ### Vowels
 
-懒得写英文了，简单来说就是，一个音高上的音，由基频和泛音列组成，基频（f0）表征音高，而泛音列表征音色。元音的合成基于如下事实：由于某些特定发声部位的共振频率不同，在不同的发声方式下，特定频率的相对强弱x VocalSynth
-
-This is an attempt to synthesize vocal without sampling.
-
-Welcome everybody to improve this algorithm.
-
-This reponsitrory is based on ```FFTW``` and [AudioFile](https://github.com/adamstark/AudioFile).
-
-## Progress
-
-Now, the author has finished the function of synthesizing vowels and some consonants.
-
-## Wish
-
-Want to synth consonants like 'l','r','n' better.
-
-## Basic theory
-
-### Vowels
-
 懒得写英文了，简单来说就是，一个音高上的音，由基频和泛音列组成，基频（f0）表征音高，而泛音列表征音色，泛音的频率会是基频的正整数倍，这可以参照高中物理。元音的合成基于如下事实：由于某些特定发声部位的共振频率不同，在不同的发声方式下，特定频率的相对强弱也不同。于是我们只需要增强特定的频段就可以合成元音，这些较强的地方就被称为共振峰，即 ```Formant```，通常来说我们只关心前几个共振峰，因为高频通常会很弱，以下如果有需要会记 (fx) 为第 x 共振峰。
 
 我实现程序其实有一个致命的 bug，因为它采用了直接合成特定强度的正弦波并叠加的方式，而不是先合成再用 FFT 增强特定频率的方式，我不知道这会不会有什么问题，因为我物理并不是很好。
