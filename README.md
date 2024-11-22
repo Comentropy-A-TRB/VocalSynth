@@ -48,7 +48,10 @@ Want to synth consonants like 'l','r','n' better.
 
 ```Singer.h``` 规定 Singer 结构体的内容。
 
+```Daisy.txt/high.txt/test.txt``` 给出了曲谱的格式示例。
+
 ```./Dictionary/``` 路径表示声库参数，具体如下，我将音符分为四类：
+
 0. 清辅音，输入较强的部分
 1. 元音，输入共振峰和对应强度
 2. 浊辅音，输入同清辅音
