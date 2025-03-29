@@ -1,0 +1,85 @@
+Find: aa.txt
+aa 720 1100 2500
+Find: ae.txt
+ae 650 1800 2550
+Find: ah.txt
+ah 625 1200 3000
+Find: ai.txt
+Find: aim.txt
+Find: ao.txt
+ao 520 780 2400
+Find: ax.txt
+ax 560 1410 2541
+Find: b.txt
+b 7600 10000 11460
+Find: d.txt
+d 5200 10500 12320
+Find: dh.txt
+dh 6300 10500 13320
+Find: eh.txt
+eh 475 1850 2520
+Find: ei.txt
+Find: er.txt
+er 425 1400 1700
+Find: f.txt
+f 7800 9500 13000
+Find: g.txt
+g 7500 10500 16310
+Find: h.txt
+h 7800 10500 13000
+Find: ih.txt
+ih 400 2000 2600
+Find: iY.txt
+iY 380 2200 3000
+Find: k.txt
+k 2000 8996 14590
+Find: l.txt
+l 550 1100 2220
+Find: m.txt
+m 3706 9500 14000
+Find: n.txt
+n 5706 9500 14000
+Find: p.txt
+p 250 500 3060
+Find: s.txt
+s 7800 10500 12320
+Find: sh.txt
+sh 3780 8370 13600
+Find: SP.txt
+SP 0 0 0
+Find: t.txt
+t 5200 10500 12320
+Find: uh.txt
+uh 450 1200 2400
+Find: uw.txt
+uw 430 1288 2350
+Find: v.txt
+v 7800 9500 13000
+Find: w.txt
+w 6000 9000 11000
+Find: y.txt
+y 5000 11500 15300
+Find: z.txt
+z 7800 10500 13000
+Generating note: aa
+req: 440 0.05 2
+req: 880 0.05 2
+req: 1320 0.05 2
+req: 1760 0.05 2
+req: 2200 0.05 2
+req: 2640 0.05 2
+req: 3080 0.05 2
+req: 3520 0.05 2
+req: 3960 0.05 2
+req: 4400 0.05 2
+req: 4840 0.05 2
+req: 5280 0.05 2
+req: 5720 0.05 2
+req: 6160 0.05 2
+req: 6600 0.05 2
+req: 7040 0.05 2
+req: 7480 0.05 2
+req: 7920 0.05 2
+req: 8360 0.05 2
+req: 8800 0.05 2
+Generated!
