@@ -47,6 +47,7 @@
 #include <iterator>
 #include <algorithm>
 #include <limits>
+#include <cstdint>  // GCC 14.3 need this? So I add it here. by Comentropy 2025/6/8
 
 // disable some warnings on Windows
 #if defined (_MSC_VER)

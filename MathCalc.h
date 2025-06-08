@@ -1,5 +1,5 @@
 #ifndef MATH_CALC_H
-#define MATH_CALC_H 1
+#define MATH_CALC_H
 
 #include "Setting.h"
 #include<cmath>

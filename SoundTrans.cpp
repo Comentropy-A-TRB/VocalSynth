@@ -107,20 +107,3 @@ void FFTfilter(int startPos,int n, const vector<double> &in, vector<double> &out
     fftw_free(real);
     fftw_free(complex);
 }
-
-void CompressorSimple(int startPos,int n,vector<double> &obj,double Ratio,double upp,double tar,double rng){
-    // 压到 upp 以下，并调整到一个下限以上。
-    // tar 指的是目标平均能量。rng 是目标动态。
-    double sum=0;
-    for(int i=0;i<n;i++){
-        double &ld=obj[i+startPos];
-        if(ld>upp)  ld=upp+(ld-upp)/Ratio;
-        sum+=ld;
-    }
-    double avg=sum/n,rms=0;
-    for(int i=0;i<n;i++){   // rms
-        double ld=obj[i+startPos];
-        rms+=(ld-avg)*(ld-avg);
-    }
-    rms=sqrt(rms/n);
-}

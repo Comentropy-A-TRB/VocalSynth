@@ -1,12 +1,11 @@
 #ifndef EFFECT_H
-#define EFFECT_H 1
+#define EFFECT_H
 
-void realizeDefaultADSR(int pos,int totsamp,const Note &note,vector<double> &buff){
-    for(int i=0;i<totsamp;i++){
-        buff[pos+i]*=singer.getADSR(note.lyr,floor(100.0*i/totsamp));
-    }
-    // 注意先做这个 ADSR 再调响度，为了比较方便调教，把元音的默认 ADSR 调得保守一点，形状如一个梯形
-}
+#include "Setting.h"
+#include "Note.h"
+#include "SoundTrans.h"
+#include "MathCalc.h"
+
 void updateDyn(int pos,int totsamp,const Note &note,vector<double> &buff){
     auto &dyn=note.dyn;
     if(dyn.empty()) return ;
@@ -26,7 +25,8 @@ void updateEQ(int pos,int totsamp,const Note &note,vector<double> &buff){
             ++j;
         req.push_back({i,i+10,MathCalc::getLinearVal(EQ[j].first,EQ[j].second,EQ[j+1].first,EQ[j+1].second,i)*0.01});
     }
-    FFTfilter(pos,totsamp,buff,buff,sampleRate,req,1);
+    FFTfilter(pos,totsamp,buff,buff,sampleRateGlobal,req,1);
 }
+
 
 #endif

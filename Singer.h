@@ -1,5 +1,9 @@
 #ifndef SINGER_H
-#define SINGER_H 1
+#define SINGER_H
+
+// 不得不感叹当时提前把这里模块化的明智决策。
+
+#include "Setting.h"
 
 #include<vector>
 #include<map>
@@ -8,9 +12,11 @@
 #include<cmath>
 #include<algorithm>
 #include<utility>
+
 using std::map,std::vector,std::string,std::pair;
-const double eps=1e-6;
+
 using constr=const string;
+
 struct Singer{
     // Singer 内主要记默认参数，尤其共振峰比较重要。
     struct Formant{
