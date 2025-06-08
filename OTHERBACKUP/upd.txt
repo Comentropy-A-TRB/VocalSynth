@@ -1,0 +1,11 @@
+I've just updated AudioFile.h to version 1.1.3 which is uploaded in 2025.
+
+Because when I used the old version 1.1.1 (2023), It worked well in GCC8.1, but I changed the compiler to GCC14.3, It got error.
+
+The reason is, it doesn't include <cstdint>.
+
+So I updated it.
+
+And you can clearly see that the author include it in 1.1.3 .
+
+orz.
