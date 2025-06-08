@@ -11,13 +11,12 @@
 #include<ctime>
 #include<io.h>
 #include<tuple>
+#include "Setting.h"
 #include "AudioFile.h"
 #include "SoundTrans.h"
 #include "Singer.h"
-#define DEBUG 1
-#define vowDelaySamples 25
-#define conDelaySamples 10
-#define eps 1e-6
+#include "MathCalc.h"
+
 using std::ifstream,std::ofstream;
 using std::vector,std::map,std::string;
 using std::cin,std::cout;
@@ -38,15 +37,7 @@ struct Sheet{
 }Tar;
 int BPM;
 string pathOfSheet;
-namespace MathCalc{
-    double getLinearVal(double x0,double y0,double x1,double y1,double x){
-        if(fabs(x0-x1)<eps) return (y0+y1)/2;
-        return 1.0*(y0-y1)/(x0-x1)*(x-x0)+y0;
-    }
-    double Mod(double x,double y){
-        return x-floor(x/y)*y;  // 笑死我了没写 floor.
-    }
-}
+
 void getBasicInfo(){
     cin>>BPM>>pathOfSheet;
 }
@@ -59,7 +50,6 @@ void getDictionary(){
     string dic;int typ;
     // !!!!!!!!!!!!!!!!!!! 这里需要相当大的调整，具体来说是要把响度曲线直接加入可变，共振峰机制不太改变。
     // 另外关于共振峰拟合的问题，我们需要进行一番修正（在 singer 里面）。
-    // 另外我们可能需要写一个 Math 库了（现在不写，还够用），来解决直线拟合/曲线拟合的问题，方便计算。
     // 最后，我们可能还需要解决 —— 各种响度的适配问题。
     vector<int> F(4),T,loud;
     vector<double> Floud(4),Mix(3);
@@ -121,14 +111,11 @@ void updateEQ(int pos,int totsamp,const Note &note,vector<double> &buff){
     }
     FFTfilter(pos,totsamp,buff,buff,sampleRate,req,1);
 }
-void setDynZero(int pos,int totsamp,vector<double> &buff){
-    // 考虑音量均一化算法。（必定要保证波形和原来差不多地把音量提升）
-}
 void effectParameters(int pos,int totsamp,const Note &note,AudioFile<double>::AudioBuffer &buff){
     // 注意因为各种音的 Delay 不同，所以这里把 totsamp 传进来。
-    // 提前做一下响度均一化。
+    // 提前做一下响度压缩。（考虑把这个做成可选项）
     for(int channel=0;channel<numChannels;channel++){
-        setDynZero(pos,totsamp,buff[channel]);
+        // dynCompress(pos,totsamp,buff[channel]);
         realizeDefaultADSR(pos,totsamp,note,buff[channel]);
         updateDyn(pos,totsamp,note,buff[channel]);
         updateEQ(pos,totsamp,note,buff[channel]);
@@ -160,8 +147,6 @@ void GenCon(int &pos,const Note &note,AudioFile<double>::AudioBuffer &buff,bool 
    
     effectParameters(pos,totsamp,note,buff);
         
-    // for(int channel=0;channel<numChannels;channel++)
-    //     realizeDefaultADSR(pos,totsamp,note,buff[channel]);
     pos+=totsamp-conDelaySamples;
 }
 void GenVow(int &pos,const Note &note,AudioFile<double>::AudioBuffer &buff,bool updPos=true,bool NoFormant=false){
@@ -208,27 +193,28 @@ void GenVow(int &pos,const Note &note,AudioFile<double>::AudioBuffer &buff,bool 
     double now=freq;
     if(note.lyr=="SP")  goto finished;
     for(int i=0;i<20 && now<=18000;i++){ 
-        // 生成 10 条 泛音，从第三条之后大小线性递减。
-        // upd: 由于已经规定了共振峰和二次函数拟合，所以可以不用递减了。
-        // if(i>3)
-        //     k-=0.04;
         genAccordingFreq(now,1.0/20,i+1);    // 记得平均。
         now+=freq;  
     }
+    
     FormantEQ();
     effectParameters(pos,totsamp,note,buff);
-    // for(int channel=0;channel<numChannels;channel++)
-    //     realizeDefaultADSR(pos,totsamp,note,buff[channel]);
+
     finished:
     if(DEBUG)cout<<"Generated!"<<std::endl;
     if(updPos)
         pos+=totsamp-vowDelaySamples;
 }
+/*
+上面的 FFT 使用，其实是一个误操作。当时写的时候 MathCalc 出了问题。所以改了。
+上面事实是不需要 FFT 的。
+一个事实是，如果能够把这些个东西统一处理就不会爆炸。得到音量比例，统一缩放就好了。
+*/
 void GenMix(int &pos,const Note &note,AudioFile<double>::AudioBuffer &buff){
     if(DEBUG)cout<<"Generating note: "<<note.lyr<<std::endl;
     int totsamp=beatToSamples(note.beat,BPM,sampleRate)+vowDelaySamples;  // 合成后置衔接过渡
     auto &X=singer.Mix[note.lyr];
-    auto genAccordingFreq=[&](double f0,double k){
+    auto genAccordingFreq=[&](double f0,double k){  // NOTE: 考虑修改这一部分。
         double k1=singer.getCoefficient(X.v1,f0),k2=singer.getCoefficient(X.v2,f0);
         double beg=X.tm1*(1-X.mixK),ed=X.tm1+X.tm2*X.mixK,nowK;
         beg*=totsamp,ed*=totsamp;
@@ -242,16 +228,57 @@ void GenMix(int &pos,const Note &note,AudioFile<double>::AudioBuffer &buff){
             }
         }
     };
-    double freq=keyToFreq(note.key);
-    double now=freq;
-    for(int i=0;i<20;i++){ 
-        genAccordingFreq(now,1.0/20);    // 记得平均。
-        now+=freq;
-    }
+    auto &pit=note.pit;
+    auto genframe_test=[&](){
+        double f0=keyToFreq(note.key);
+        double beg=X.tm1*(1-X.mixK),ed=X.tm1+X.tm2*X.mixK;
+        beg*=totsamp,ed*=totsamp;   // added: 复制掉了一行。
+        vector<double> w(20),b(20);
+        for(int lay=0;lay<20;lay++)
+            w[lay]=(pit.empty()?f0:pit[0].second+f0) * (lay+1)*2.0*M_PI,b[lay]=0,cout<<"wlay: "<<w[lay]<<std::endl;   // fixed: 乘号放外面记得。这里和上面 GenVow 不太一样了。
+            // f0 是真的基频了。
+        //
+        cout<<"tot: "<<totsamp<<std::endl;
+        for(int i=0,j=0,pitsz=pit.size();i<totsamp;i++){
+            int to=pos+i;
+            while(j+1<pitsz && i>=pit[j+1].first*totsamp)
+                ++j;
+            for(int lay=0;lay<20;lay++){
+                double f_lay=f0*(lay+1),frq=f_lay;
+                if(pitsz && i>0){        
+                    frq=MathCalc::getLinearVal(pit[j].first*totsamp,pit[j].second,
+                                            pit[j+1].first*totsamp,pit[j+1].second,i)*(lay+1)+f_lay;
+                    if(fabs(w[lay]-frq*2.0*M_PI)>eps*40){   // 规避一些精度问题
+                        b[lay]=MathCalc::Mod((w[lay]-frq*2.0*M_PI)*(i-1)/sampleRate+b[lay],2.0*M_PI);
+                        w[lay]=frq*2.0*M_PI;
+                    }
+                }
+                double k1=singer.getCoefficient(X.v1,f_lay),k2=singer.getCoefficient(X.v2,f_lay),nowK;   // 这里我也不知道为什么使用 f_lay 效果显著更好，本来应该是 frq 的啊。
+                // 大概是因为共振峰的拟合太差了，这里直接上 f_lay 的固定比例还更好一点。
+                // if(note.lyr=="aim")std::cerr<<k1<<" "<<k2<<std::endl;
+                if(i<beg)   nowK=k1;
+                else if(i<ed)   nowK=(k2-k1)/(ed-beg)*(i-beg)+k1;
+                else    nowK=k2;
+                nowK*=0.06;
+                if(i%10000==0)
+                    cout<<"nowK: "<<nowK<<std::endl;
+                for(int channel=0;channel<numChannels;channel++){
+                    buff[channel][to]+=nowK*sin((static_cast<double>(i)/sampleRate)*w[lay]+b[lay]);
+                }
+            }
+            // NOTE：如果在这里强制使用之前的音高不变的合成方法就会爆炸，只能上 EQ 了。
+        }
+    };
+    genframe_test();
+    // double freq=keyToFreq(note.key);
+    // double now=freq;
+    // for(int i=0;i<20;i++){ 
+    //     genAccordingFreq(now,1.0/20);    // 记得平均。
+    //     now+=freq;
+    // }
     
     effectParameters(pos,totsamp,note,buff);
-    // for(int channel=0;channel<numChannels;channel++)
-    //     realizeDefaultADSR(pos,totsamp,note,buff[channel]);
+    
     if(DEBUG)cout<<"Generated!"<<std::endl;
     pos+=totsamp-vowDelaySamples;
 }

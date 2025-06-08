@@ -21,7 +21,7 @@ struct Singer{
 
     struct ADSR{    // begin from 0 ! ! !
         vector<int> T,loud;    // precent ;
-        ADSR():T(4),loud(4){}
+        // ADSR():T(4),loud(4){}
     };
 
     struct MixVow{  // 对于交变参数单独处理。
@@ -73,9 +73,9 @@ struct Singer{
             return fx.loud[num]-k*fabs(fx.F[num]-freq);
         };
         if(freq<=fx.F[1])   
-            return std::max(eps,dist(1,0.0004));
+            return std::max(eps,dist(1,0.0006));
         if(freq>=fx.F[3])
-            return std::max(eps,dist(3,0.0004));
+            return std::max(eps,dist(3,0.0006));
         return std::max({eps,dist(1,0.0005),dist(2,0.0005),dist(3,0.0005)});
     }
     double getADSR(constr &lyr,int perc){
