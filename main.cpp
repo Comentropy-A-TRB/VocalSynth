@@ -35,7 +35,7 @@ void getBasicInfo(){
 void getDictionary(){
     // Path of dictionary.
     _finddata_t file;
-    int readRet;
+    intptr_t readRet;   // fixed! 之前我用 GCC8.1 的时候直接用 int 存了，现在改了 64 位指针标准，必须换类型，不然 RE。
     if((readRet=_findfirst("./Dictionary/*.txt",&file))==-1)
         cout<<"Dictionary of singer is empty"<<std::endl,exit(0);
     string dic;int typ;
@@ -74,6 +74,7 @@ void getDictionary(){
         singer.setADSR(dic,T,loud);
         //
     }while(_findnext(readRet,&file)==0);
+    std::cerr<<"Dictionary got."<<std::endl;
 }
 
 template<typename T1,typename T2>
@@ -114,7 +115,7 @@ void getSheetAndGen(){
         }
     }
     AudioFile<double> audioFile;
-    audioFile.setNumChannels(1);
+    audioFile.setNumChannels(numChannels);
     audioFile.setSampleRate(sampleRateGlobal);
     audioFile.setAudioBuffer(buff);
     audioFile.save("Export.wav",AudioFileFormat::Wave);

@@ -11,7 +11,7 @@
 #include<iostream>
 #include<random>
 #include<ctime>
-using std::cout;
+using std::cout,std::vector;
 
 // 元音/辅音的 两个 bool 参数之前设了默认值，由于后带了一个 singer，暂时没法用了，只能根据默认值重传一下。
 

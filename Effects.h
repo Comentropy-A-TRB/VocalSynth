@@ -6,6 +6,9 @@
 #include "SoundTrans.h"
 #include "MathCalc.h"
 
+#include<vector>
+using std::vector;
+
 void updateDyn(int pos,int totsamp,const Note &note,vector<double> &buff){
     auto &dyn=note.dyn;
     if(dyn.empty()) return ;
