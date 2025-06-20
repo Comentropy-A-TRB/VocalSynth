@@ -27,16 +27,19 @@ Singer singer;
 struct Sheet{
     vector<Note> Que;
 }Tar;
-string pathOfSheet;
+string pathOfSheet,dictPath;
 
 void getBasicInfo(){
+    std::cerr<<"please input dictionary path first. And then BPM, path of sheet"<<std::endl;
+    cin>>dictPath;  // like ./English_Dictionary/
     cin>>BPM>>pathOfSheet;
 }
 void getDictionary(){
     // Path of dictionary.
     _finddata_t file;
     intptr_t readRet;   // fixed! 之前我用 GCC8.1 的时候直接用 int 存了，现在改了 64 位指针标准，必须换类型，不然 RE。
-    if((readRet=_findfirst("./Dictionary/*.txt",&file))==-1)
+    // std::cerr<<(dictPath+"*.txt")<<std::endl;
+    if((readRet=_findfirst((dictPath+"*.txt").c_str(),&file))==-1)
         cout<<"Dictionary of singer is empty"<<std::endl,exit(0);
     string dic;int typ;
     // !!!!!!!!!!!!!!!!!!! 这里需要相当大的调整，具体来说是要把响度曲线直接加入可变，共振峰机制不太改变。
@@ -47,7 +50,7 @@ void getDictionary(){
     do{
         if(DEBUG)cout<<"Find: "<<file.name<<std::endl;
         dic=file.name;
-        ifstream pathofdic("./Dictionary/"+dic);
+        ifstream pathofdic(dictPath+dic);
         assert(dic.size()>4);
         assert(dic.substr(dic.size()-4)==".txt");
         dic.resize(dic.size()-4);
@@ -129,3 +132,8 @@ int main(){
     // system("Pause");
     return 0;
 } 
+
+/*
+./Japanese_Dictionary/
+183 reyichang.txt
+*/

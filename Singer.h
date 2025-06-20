@@ -32,7 +32,7 @@ struct Singer{
 
     struct MixVow{  // 对于交变参数单独处理。
         string v1,v2;
-        double tm1,tm2,mixK;
+        double tm1,tm2,mixK;    // tm1,tm2 即时长比例，mixK 就是交融比例。
     };
     // 0 -> 辅音; 1 -> vowels, 2 -> 浊辅音，3-> 交变双元音
     map<string,int> typ;
